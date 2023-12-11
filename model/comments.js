@@ -4,16 +4,11 @@ const { DATA_FILE } = process.env;
 const VIDEOS_PATH = DATA_FILE;
 
 function getVideoComments(id, api_key) {
-  console.log("listing comments for :", id, api_key);
   const file = fs.readFileSync(VIDEOS_PATH);
   const videos = JSON.parse(file);
   let video = videos[api_key].find((video) => video.id == id);
-  console.log("amin", id, "====> ", video);
-
   if (!Object.keys(video).includes("comments")) {
-    console.log("comments not found");
     video.comments = [];
-    console.log(videos[api_key]);
   }
   return video.comments;
 }
@@ -27,10 +22,8 @@ function getAllVideos() {
 function createComment(id, comment, api_key) {
   const videos = getAllVideos();
   videoFound = videos[api_key].find((video) => video.id == id);
-  console.log(videoFound);
   if (videoFound) {
     videoFound.comments ??= [];
-    console.log("videoFound", videoFound);
     videoFound.comments.push(comment);
     fs.writeFileSync(VIDEOS_PATH, JSON.stringify(videos));
   } else {
@@ -45,7 +38,6 @@ function deleteComment(id, commentId, api_key) {
     const commentIndex = videoFound.comments.findIndex(
       (comment) => comment.id == commentId
     );
-    console.log(commentId, commentIndex);
     if (commentIndex !== -1) {
       videoFound.comments.splice(commentIndex, 1);
       fs.writeFileSync(VIDEOS_PATH, JSON.stringify(videos));
