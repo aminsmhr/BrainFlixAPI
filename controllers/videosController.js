@@ -1,13 +1,19 @@
 const { v4 } = require("uuid");
 const { getVideos, createVideo, getOneVideo } = require("../model/videos");
+const {
+  getVideoComments,
+  createComment,
+  deleteComment,
+} = require("../model/comments");
 
 function get(req, res) {
-  const videos = getVideos();
+  const videos = getVideos(req.query.api_key);
+  console.log(req.query.api_key);
   res.json(videos);
 }
 
 function getOne(req, res) {
-  const video = getOneVideo(req.params.id);
+  const video = getOneVideo(req.params.id, req.query.api_key);
   if (video) {
     res.json(video);
   } else {
@@ -16,27 +22,58 @@ function getOne(req, res) {
 }
 
 function post(req, res) {
-  const { title, url, creator } = req.body;
+  const { title, channel, image, description, duration, video, timestamp } =
+    req.body;
 
   const newVideo = {
     id: v4(),
     title,
-    url,
-    creator,
+    channel,
+    image,
+    description,
+    duration,
+    video,
+    timestamp,
   };
 
-  createVideo(newVideo);
+  createVideo(newVideo, req.query.api_key);
   res.send("create new video");
 }
 
-function validator(req, res, next) {
-  console.log("hi from inline middleware");
-  const { title, url, creator } = req.body;
-  if (!title || !url || !creator) {
-    res.status(400).send("need a title, URL, and creator for the video");
-  } else {
-    next();
+// function getComments(req, res) {
+//   getVideoComments()
+//   res.send("create new comment");
+// }
+
+function addComment(req, res) {
+  try {
+    const comments = getVideoComments(req.body.id, req.params.api_key);
+    createComment(
+      req.body.id,
+      {
+        ...req.body.comment,
+        id: comments > -1 ? comments.length++ : 0,
+        timestamp: new Date().getTime(),
+      },
+      req.params.api_key
+    );
+    res.send("create new comment");
+  } catch {
+    res.status(500).send("Server failed to store your comment");
   }
+}
+
+function removeComment(req, res) {
+  deleteComment();
+  res.send("create new comment");
+}
+
+function validator(req, res, next) {
+  if (req.params.api_key === null) {
+    console.log("this if is being processed in the middle ware");
+    res.status(400).send("need an API key");
+  }
+  next();
 }
 
 module.exports = {
@@ -44,4 +81,6 @@ module.exports = {
   post,
   get,
   getOne,
+  addComment,
+  removeComment,
 };
