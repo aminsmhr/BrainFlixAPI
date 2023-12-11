@@ -4,6 +4,7 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const videoRoutes = require("./routes/videos");
 const registerRoutes = require("./routes/register");
@@ -15,6 +16,8 @@ const { PORT } = process.env;
 // above will allow cors only from provided origin
 app.use(cors());
 app.use(express.json());
+const publicPath = path.join(__dirname, "public");
+app.use(express.static(publicPath));
 
 app.use("/videos", videoRoutes);
 app.use("/register", registerRoutes);
