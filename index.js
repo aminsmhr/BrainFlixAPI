@@ -19,11 +19,7 @@ app.use(cors());
 
 app.use(express.json());
 
-// local dog facts!
-app.use("/api/v2", dogFacts);
-
-// our 'entry point' to the notes routes
-app.use("/notes", noteRoutes);
+app.use("/videos", noteRoutes);
 
 // note how 'succint' this file is. it tells us the 'basics':
 // enables cores, mounts some route files, and listens for connections on a port.  That's it!
