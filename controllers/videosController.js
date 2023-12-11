@@ -32,12 +32,16 @@ function post(req, res) {
     image,
     description,
     duration,
-    video,
+    video: "https://project-2-api.herokuapp.com/stream",
     timestamp,
   };
-
-  createVideo(newVideo, req.query.api_key);
-  res.send("create new video");
+  try {
+    console.log(newVideo);
+    createVideo(newVideo, req.query.api_key);
+    res.json(newVideo);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
 }
 
 // function getComments(req, res) {
@@ -47,30 +51,34 @@ function post(req, res) {
 
 function addComment(req, res) {
   try {
-    const comments = getVideoComments(req.body.id, req.params.api_key);
+    const comments = getVideoComments(req.params.id, req.query.api_key);
+    let newId = comments.length > -1 ? comments.length + 1 : 0;
     createComment(
-      req.body.id,
+      req.params.id,
       {
-        ...req.body.comment,
-        id: comments > -1 ? comments.length++ : 0,
+        ...req.body,
+        id: newId,
         timestamp: new Date().getTime(),
       },
-      req.params.api_key
+      req.query.api_key
     );
-    res.send("create new comment");
-  } catch {
-    res.status(500).send("Server failed to store your comment");
+    res.json({
+      ...req.body,
+      id: newId,
+      timestamp: new Date().getTime(),
+    });
+  } catch (e) {
+    res.status(500).send(`Server failed to store your comment: ${e.message}`);
   }
 }
 
 function removeComment(req, res) {
-  deleteComment();
-  res.send("create new comment");
+  deleteComment(req.params.id, req.params.commentId, req.query.api_key);
+  res.send("Comment removed");
 }
 
 function validator(req, res, next) {
   if (req.params.api_key === null) {
-    console.log("this if is being processed in the middle ware");
     res.status(400).send("need an API key");
   }
   next();
