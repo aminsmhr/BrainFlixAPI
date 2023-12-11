@@ -3,6 +3,18 @@ require("dotenv").config();
 const { DATA_FILE } = process.env;
 const VIDEOS_PATH = DATA_FILE;
 
+const templateVideo = {
+  title: undefined,
+  channel: undefined,
+  image: undefined,
+  description: undefined,
+  views: undefined,
+  likes: undefined,
+  duration: undefined,
+  video: undefined,
+  timestamp: undefined,
+  comments: [],
+};
 // the 'model' is where we interact with the resource (ie the 'videos' themselves),
 // to send to the controller (which then sends the info off to the client/view)
 
@@ -19,16 +31,22 @@ function getAllVideos() {
 }
 
 function getOneVideo(id, api_key) {
-  // notice we are using 'getVideos' here
   const videos = getVideos(api_key);
-  const video = videos[api_key].find((video) => video.id === id);
+  const video = videos.find((video) => video.id == id);
   return video;
 }
 
 function createVideo(video, api_key) {
   // notice we are using 'getVideos' here too
   const videos = getAllVideos();
-  videos[api_key].push(video);
+  const newId = videos[api_key].length + 1;
+  const mergedObject = {
+    ...templateVideo,
+    ...video,
+    id: newId,
+  };
+  videos[api_key].push(mergedObject);
+  console.log(mergedObject);
   fs.writeFileSync(VIDEOS_PATH, JSON.stringify(videos));
 }
 
